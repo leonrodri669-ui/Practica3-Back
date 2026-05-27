@@ -1,37 +1,102 @@
 <script setup>
 
-import { ref } from 'vue'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { reactive, ref } from 'vue'
 
-const router = useRouter()
+const loading = ref(false)
 
-const producto = ref({
+const mensaje = ref('')
+
+const preview = ref(null)
+
+const imagen = ref(null)
+
+const form = reactive({
+
     nombre: '',
     descripcion: '',
     precio: '',
     stock: ''
 })
 
-const guardarProducto = async () => {
+const onImageChange = (e) => {
+
+    const file = e.target.files[0]
+
+    if (!file) return
+
+    imagen.value = file
+
+    preview.value = URL.createObjectURL(file)
+}
+
+const guardar = async () => {
+
+    if (!form.nombre || !form.precio) {
+
+        mensaje.value = 'Completa campos obligatorios'
+
+        setTimeout(() => {
+
+            mensaje.value = ''
+
+        }, 3000)
+
+        return
+    }
+
+    loading.value = true
 
     try {
 
+        const fd = new FormData()
+
+        fd.append('nombre', form.nombre)
+        fd.append('descripcion', form.descripcion)
+        fd.append('precio', form.precio)
+        fd.append('stock', form.stock)
+
+        if (imagen.value) {
+
+            fd.append('imagen', imagen.value)
+        }
+
         await axios.post(
+
             'http://127.0.0.1:8000/api/productos',
-            producto.value
+
+            fd,
+
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
         )
 
-        alert('Producto creado')
+        mensaje.value = 'Producto creado'
 
-        router.push('/catalogo')
+        form.nombre = ''
+        form.descripcion = ''
+        form.precio = ''
+        form.stock = ''
+
+        preview.value = null
+
+        setTimeout(() => {
+
+            mensaje.value = ''
+
+        }, 3000)
 
     } catch (error) {
 
         console.log(error)
 
-        alert('Error al guardar')
+        mensaje.value = 'Error al guardar'
     }
+
+    loading.value = false
 }
 
 </script>
@@ -42,22 +107,28 @@ const guardarProducto = async () => {
 
     <h1>Nuevo producto</h1>
 
+    <p v-if="mensaje">
+
+        {{ mensaje }}
+
+    </p>
+
     <input
-        v-model="producto.nombre"
+        v-model="form.nombre"
         placeholder="Nombre"
     >
 
     <br><br>
 
     <textarea
-        v-model="producto.descripcion"
+        v-model="form.descripcion"
         placeholder="Descripción"
     ></textarea>
 
     <br><br>
 
     <input
-        v-model="producto.precio"
+        v-model="form.precio"
         type="number"
         placeholder="Precio"
     >
@@ -65,16 +136,42 @@ const guardarProducto = async () => {
     <br><br>
 
     <input
-        v-model="producto.stock"
+        v-model="form.stock"
         type="number"
         placeholder="Stock"
     >
 
     <br><br>
 
-    <button @click="guardarProducto">
+    <input
+        type="file"
+        accept="image/*"
+        @change="onImageChange"
+    >
 
-        Guardar producto
+    <br><br>
+
+    <img
+        v-if="preview"
+        :src="preview"
+        width="200"
+    >
+
+    <br><br>
+
+    <button @click="guardar">
+
+        <span v-if="loading">
+
+            Guardando...
+
+        </span>
+
+        <span v-else>
+
+            Guardar producto
+
+        </span>
 
     </button>
 

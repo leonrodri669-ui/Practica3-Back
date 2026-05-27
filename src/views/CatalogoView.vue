@@ -77,6 +77,15 @@ onMounted(() => {
 
         </button>
 
+        <img
+            :src="
+                producto.imagen_url
+                ||
+                'https://via.placeholder.com/200'
+            "
+            width="200"
+        >
+
         <br><br>
 
         <router-link :to="`/catalogo/${producto.id}`">
