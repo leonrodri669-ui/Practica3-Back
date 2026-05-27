@@ -53,7 +53,12 @@ const routes = [
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('../views/NotFound.vue')
-    }
+    },
+
+    {
+        path: '/carrito',
+        component: () => import('../views/CartView.vue')
+    },
 ]
 
 const router = createRouter({

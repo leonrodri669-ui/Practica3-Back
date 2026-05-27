@@ -1,3 +1,9 @@
+<script setup>
+
+import CartIcon from '../components/CartIcon.vue'
+
+</script>
+
 <template>
 
 <div style="display:flex">
@@ -9,7 +15,7 @@
             padding:20px;
         "
     >
-
+        <CartIcon />
         <h2>Admin</h2>
 
         <router-link to="/admin">
